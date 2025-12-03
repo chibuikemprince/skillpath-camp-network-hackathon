@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import WeekView from './pages/WeekView';
 import LessonView from './pages/LessonView';
+import CertificateView from './pages/CertificateView';
 import { isAuthenticated } from './utils/auth';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -60,6 +61,10 @@ function App() {
                   <LessonView />
                 </ProtectedRoute>
               }
+            />
+            <Route
+              path="/certificate/:curriculumId"
+              element={<CertificateView />}
             />
           </Routes>
         </div>

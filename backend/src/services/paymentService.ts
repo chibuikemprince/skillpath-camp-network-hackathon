@@ -19,6 +19,10 @@ class PaymentService {
 
   async confirmPayment(txHash: string, curriculumId: string, userAddress?: string): Promise<{ success: boolean; reason?: string }> {
     try {
+      if (!this.merchantAddress) {
+        return { success: false, reason: 'Merchant address not configured' };
+      }
+
       // Get transaction details
       const tx = await this.publicClient.getTransaction({ hash: txHash as `0x${string}` });
       const receipt = await this.publicClient.getTransactionReceipt({ hash: txHash as `0x${string}` });
@@ -34,6 +38,10 @@ class PaymentService {
 
       if (tx.value < this.certPriceWei) {
         return { success: false, reason: 'Insufficient payment amount' };
+      }
+
+      if (tx.value !== this.certPriceWei) {
+        return { success: false, reason: 'Payment amount does not match required price' };
       }
 
       const fromAddress = userAddress || tx.from;
@@ -87,11 +95,12 @@ class PaymentService {
     };
   }
 
-  getCertificatePrice(): { priceWei: string; priceEth: string } {
+  getCertificatePrice(): { priceWei: string; priceEth: string; merchantAddress: string } {
     const priceEth = (Number(this.certPriceWei) / 1e18).toString();
     return {
       priceWei: this.certPriceWei.toString(),
-      priceEth
+      priceEth,
+      merchantAddress: this.merchantAddress
     };
   }
 }

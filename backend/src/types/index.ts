@@ -162,6 +162,15 @@ export interface CertificateEligibility {
   minScore: number;
   requiredMinScore: number;
   reason?: string;
+  certificateInfo?: {
+    curriculumId: string;
+    userAddress: string | null;
+    paymentTxHash: string | null;
+    paidAt: Date | string;
+    canMint: boolean;
+    tokenId?: string;
+    mintTxHash?: string;
+  };
 }
 
 export interface CertificateMetadata {

@@ -15,7 +15,7 @@ const PayForCertificateButton: React.FC<PayForCertificateButtonProps> = ({
   const [eligibility, setEligibility] = useState<CertificateEligibility | null>(null);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
-  const [price, setPrice] = useState<{ priceWei: string; priceEth: string } | null>(null);
+  const [price, setPrice] = useState<{ priceWei: string; priceEth: string; merchantAddress: string } | null>(null);
   const [account, setAccount] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
 
@@ -64,7 +64,7 @@ const PayForCertificateButton: React.FC<PayForCertificateButtonProps> = ({
     if (!account) return;
     
     try {
-      const result = await certificatesAPI.getEligibility(curriculumId, account);
+      const result = await certificatesAPI.getPaymentEligibility(curriculumId, account);
       setEligibility(result);
     } catch (error) {
       console.error('Error loading eligibility:', error);
@@ -99,12 +99,13 @@ const PayForCertificateButton: React.FC<PayForCertificateButtonProps> = ({
         method: 'eth_sendTransaction',
         params: [{
           from: account,
-          to: import.meta.env.VITE_MERCHANT_ADDRESS,
+          to: price.merchantAddress,
           value: '0x' + BigInt(price.priceWei).toString(16),
         }],
       });
       
-      await certificatesAPI.confirmPayment(curriculumId, account, txHash);
+      await certificatesAPI.confirmOnchainPayment(curriculumId, account, txHash);
+      await certificatesAPI.recordCertificatePayment(curriculumId, account, txHash);
       await loadEligibility();
       
       if (onPaymentComplete) {

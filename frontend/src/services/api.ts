@@ -80,18 +80,26 @@ export const resourcesAPI = {
     api.get('/resources/portfolio').then(res => res.data),
 };
 
-// Certificates API
+// Certificates & Payments API
 export const certificatesAPI = {
-  getCertificatePrice: (): Promise<{ priceWei: string; priceEth: string }> =>
+  // Payment side
+  getCertificatePrice: (): Promise<{ priceWei: string; priceEth: string; merchantAddress: string }> =>
     api.get('/payments/price').then(res => res.data),
     
-  getEligibility: (curriculumId: string, userAddress?: string): Promise<CertificateEligibility> => {
+  getPaymentEligibility: (curriculumId: string, userAddress?: string): Promise<CertificateEligibility> => {
     const config = userAddress ? { headers: { 'x-user-address': userAddress } } : {};
     return api.get(`/payments/eligibility?curriculumId=${curriculumId}`, config).then(res => res.data);
   },
   
-  confirmPayment: (curriculumId: string, walletAddress: string, txHash: string): Promise<{ message: string }> =>
+  confirmOnchainPayment: (curriculumId: string, walletAddress: string, txHash: string): Promise<{ message: string }> =>
     api.post('/payments/confirm', { curriculumId, userAddress: walletAddress, txHash }).then(res => res.data),
+
+  // Course eligibility (auth-based)
+  getCourseEligibility: (curriculumId: string): Promise<CertificateEligibility> =>
+    api.get(`/certificates/eligibility?curriculumId=${curriculumId}`).then(res => res.data),
+
+  recordCertificatePayment: (curriculumId: string, walletAddress: string, paymentTxHash: string): Promise<{ message: string }> =>
+    api.post('/certificates/payment-confirmed', { curriculumId, walletAddress, paymentTxHash }).then(res => res.data),
   
   requestMint: (curriculumId: string, walletAddress: string): Promise<MintResponse> =>
     api.post('/certificates/request-mint', { curriculumId, walletAddress }).then(res => res.data),

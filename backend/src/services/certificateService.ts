@@ -88,7 +88,16 @@ class CertificateService {
       allTestsPassed: progress.allModulesPassed,
       minScore: progress.minScore,
       requiredMinScore: 50,
-      reason: !progress.eligibleForCertificate ? 'Complete all modules and pass all tests with at least 50%' : undefined
+      reason: !progress.eligibleForCertificate ? 'Complete all modules and pass all tests with at least 50%' : undefined,
+      certificateInfo: {
+        curriculumId,
+        userAddress: progress.walletAddress,
+        paymentTxHash: progress.certificatePaymentTxHash,
+        paidAt: progress.updatedAt,
+        canMint: progress.eligibleForCertificate && progress.certificatePaid,
+        tokenId: progress.certificateTokenId || undefined,
+        mintTxHash: progress.certificateMintTxHash || undefined
+      }
     };
   }
 
